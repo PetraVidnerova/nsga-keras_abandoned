@@ -9,6 +9,7 @@ from deap import creator
 from deap import tools
 
 from individual import Individual, initIndividual
+from convindividual import ConvIndividual
 from fitness import Fitness
 from mutation import Mutation
 from crossover import Crossover
@@ -16,12 +17,15 @@ import alg
 from dataset import load_data
 from config import Config, load_config
 from utils import error
+from nsga import selectNSGA
 
 import argparse
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--type', help='either "conv" or "dense"') 
 parser.add_argument('--trainset', help='filename of training set')
 parser.add_argument('--testset', help='filename of test set')
+parser.add_argument('--nsga', help='1,2,3')
 parser.add_argument('--id', help='computation id')
 parser.add_argument(
     '--checkpoint', help='checkpoint file to load the initial state from')
@@ -30,9 +34,13 @@ parser.add_argument('--config', help='json config filename')
 args = parser.parse_args()
 trainset_name = args.trainset
 testset_name = args.testset
+use_conv_layers = args.type == "conv" 
+if use_conv_layers:
+    print("**** Using convolutional layers.") 
 id = args.id
 if id is None:
     id = ""
+nsga_number = int(args.nsga) if args.nsga else 2
 checkpoint_file = args.checkpoint
 config_name = args.config
 if config_name is not None:
@@ -44,7 +52,10 @@ if Config.task_type == "classification":
     creator.create("FitnessMax", base.Fitness, weights=(1.0, -1.0)) 
 else:
     creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
-creator.create("Individual", Individual, fitness=creator.FitnessMax)
+
+creator.create("Individual", 
+               ConvIndividual if use_conv_layers else Individual, 
+               fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 
@@ -64,8 +75,12 @@ cross = Crossover()
 toolbox.register("evaluate", fit.evaluate)
 toolbox.register("mate", cross.cxOnePoint)
 toolbox.register("mutate", mut.mutate)
-toolbox.register("select", tools.selNSGA2)
-
+if nsga_number == 2:
+    toolbox.register("select", tools.selNSGA2)
+elif nsga_number == 1:
+    toolbox.register("select", selectNSGA)
+else:
+    raise NotImplementedError()
 
 def main(id, checkpoint_name=None):
     # random.seed(64)
