@@ -95,3 +95,13 @@ def nsga(fitnesses, population_size):
         choice = np.concatenate(fronts)
 
     return choice
+
+
+def selectNSGA(pool, n):
+    """ select n individuals from the pool
+    returns list of references to original objects """ 
+
+    fitnesses = [ ind.fitness.values for ind in pool ] 
+    selected = nsga(fitnesses, n) 
+    
+    return [ pool[i] for i in selected ]

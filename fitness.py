@@ -43,15 +43,19 @@ class Fitness:
             y_train, y_test = self.y[train], self.y[test]
                 
             model = individual.createNetwork()
+            size = model.count_params() // 1000
             model.fit(X_train, y_train,
                       batch_size=Config.batch_size, epochs=Config.epochs, verbose=0)
             
             yy_test = model.predict(X_test)
             scores.append(error(y_test, yy_test))
+
             
         fitness = np.mean(scores)
-            
+
         # I try this to prevent memory leaks in nsga2-keras 
         K.clear_session()
 
-        return fitness,
+
+
+        return fitness, size

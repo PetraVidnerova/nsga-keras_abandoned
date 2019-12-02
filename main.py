@@ -2,6 +2,7 @@ import random
 import pickle
 import numpy as np
 import multiprocessing
+import json
 
 from deap import base
 from deap import creator
@@ -38,10 +39,11 @@ if config_name is not None:
     load_config(config_name)
 
 # for classification fitness is accuracy, for approximation fitness is error
+# second fitness element is network size, should be minimised
 if Config.task_type == "classification":
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+    creator.create("FitnessMax", base.Fitness, weights=(1.0, -1.0)) 
 else:
-    creator.create("FitnessMax", base.Fitness, weights=(-1.0,))
+    creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", Individual, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
@@ -51,7 +53,7 @@ toolbox.register("individual", initIndividual, creator.Individual)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # use multiple processors
-pool = multiprocessing.Pool(5)
+pool = multiprocessing.Pool(10)
 toolbox.register("map", pool.map)
 
 # register operators
@@ -79,14 +81,14 @@ def main(id, checkpoint_name=None):
     else:
         pop = toolbox.population(n=Config.pop_size)
         start_gen = 0
-        hof = tools.HallOfFame(1)
+        hof = tools.ParetoFront()
         logbook = tools.Logbook()
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", np.mean)
-    stats.register("std", np.std)
-    stats.register("min", np.min)
-    stats.register("max", np.max)
+    stats.register("avg", np.mean, axis=0)
+    stats.register("std", np.std, axis=0)
+    stats.register("min", np.min, axis=0)
+    stats.register("max", np.max, axis=0)
 
     pop, log = alg.myNSGASimple(pop, start_gen, toolbox, cxpb=0.6, mutpb=0.2, ngen=Config.ngen,
                                 stats=stats, halloffame=hof, logbook=logbook, verbose=True,
@@ -111,14 +113,14 @@ if __name__ == "__main__":
     else:
         pop, log, hof = main(id, checkpoint_file)
 
-    # TODO: not best model, we have pareto front !!!
-    network = hof[0].createNetwork()
-    network.summary()
-    print(hof[0])
-    print(hof[0].fitness)
+    # print and save the pareto front 
+    json_list = [] 
+    for ind in hof:
+        print(ind.fitness.values)
+        json_list.appen(ind.createNetwork().to_json())
 
     with open("best_model_{}.json".format(id), "w") as f:
-        f.write(network.to_json())
+        f.write(json.dumps(json_list))
 
     # learn on the whole set
     #
