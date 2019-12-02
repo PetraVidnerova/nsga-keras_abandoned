@@ -37,7 +37,7 @@ def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
         record = stats.compile(population)
         logbook.record(gen=gen, evals=evals, **record)
         if verbose:
-            print(logbook.stream)
+            print(logbook.stream, flush=True)
 
         # save checkpoint
         if gen % 1 == 0:
