@@ -39,15 +39,15 @@ def main(conv):
         USE_CONV = True
 
 
-@main.command()
-@click.argument("cp_name")
-def show_pop(cp_name):
-    pop, _, _ = load_checkpoint(cp_name)
-    print(len(pop))
-    print(" i: acc    size")
-    for i, ind in enumerate(pop):
-        print(f"{i:2}: {ind.fitness.values[0]*100:.2f} ",
-              f"{ind.fitness.values[1]:5.1f}")
+# @main.command()
+# @click.argument("cp_name")
+# def show_pop(cp_name):
+#     pop, _, _ = load_checkpoint(cp_name)
+#     print(len(pop))
+#     print(" i: acc    size")
+#     for i, ind in enumerate(pop):
+#         print(f"{i:2}: {ind.fitness.values[0]*100:.2f} ",
+#               f"{ind.fitness.values[1]:5.1f}")
 
 
 @main.command()
@@ -106,6 +106,12 @@ def plot(cp_name):
 
     plt.show()
 
+@main.command()
+@click.argument("cp_name")
+def query_iter(cp_name):
+    _, _, log = load_checkpoint(cp_name)
+
+    print("Last generation:", [ line["gen"] for line in log][-1])
 
 if __name__ == "__main__":
     main()
