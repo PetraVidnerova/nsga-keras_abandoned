@@ -1,3 +1,4 @@
+import tensorflow as tf 
 import random 
 import numpy as np 
 import pickle
@@ -7,7 +8,7 @@ from dataset import load_data
 from config import Config
 from utils import error
 from keras import backend as K 
-
+import multiprocessing as mt
 
 class Database:
 
@@ -33,7 +34,8 @@ class Fitness:
 
         #model = individual.createNetwork()
         #return random.random(), 
-         
+        pid = mt.current_process().pid
+
         random.seed(42) 
         # perform KFold crossvalidation 
         kf = KFold(n_splits=5)
@@ -44,12 +46,13 @@ class Fitness:
                 
             model = individual.createNetwork()
             size = model.count_params() // 1000
-            model.fit(X_train, y_train,
-                      batch_size=Config.batch_size, epochs=Config.epochs, verbose=0)
-            
-            yy_test = model.predict(X_test)
-            scores.append(error(y_test, yy_test))
-
+            with tf.device("/gpu:"+str(pid % Config.nprocessors)):
+                model.fit(X_train, y_train,
+                          batch_size=Config.batch_size, 
+                          epochs=Config.epochs, verbose=0)
+                yy_test = model.predict(X_test)
+                scores.append(error(y_test, yy_test))
+            del model
             
         fitness = np.mean(scores)
 

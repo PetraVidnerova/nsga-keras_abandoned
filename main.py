@@ -64,7 +64,7 @@ toolbox.register("individual", initIndividual, creator.Individual)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # use multiple processors
-pool = multiprocessing.Pool(10)
+pool = multiprocessing.Pool(Config.nprocessors)
 toolbox.register("map", pool.map)
 
 # register operators
