@@ -6,6 +6,9 @@ from deap import creator, base
 
 from individual import Individual
 from convindividual import ConvIndividual
+from dataset import load_data
+from config import Config
+from utils import error, print_stat
 
 USE_CONV = False
 
@@ -48,10 +51,34 @@ def show_pop(cp_name):
 
 
 @main.command()
+@click.argument("i", type=int)
+@click.argument("trainset")
+@click.argument("testset")
 @click.argument("cp_name")
-@click.argument("i")
-def evaluate(cp_name, i):
-    pass
+def evaluate(i, trainset, testset, cp_name):
+    pop, _, _ = load_checkpoint(cp_name)
+
+    # load the whole data
+    X_train, y_train = load_data("data/" + trainset)
+    X_test, y_test = load_data("data/" + testset)
+
+    E_train, E_test = [], []  # list of accuracies
+    for _ in range(5):
+        network = pop[i].createNetwork()
+        network.fit(X_train, y_train,
+                    batch_size=Config.batch_size,
+                    nb_epoch=20,
+                    verbose=0)
+
+        yy_train = network.predict(X_train)
+        E_train.append(error(yy_train, y_train))
+
+        yy_test = network.predict(X_test)
+        E_test.append(error(yy_test, y_test))
+
+    print_stat(E_train, "train")
+    print_stat(E_test, "test")
+    print(pop[i].fitness.values)
 
 
 @main.command()
