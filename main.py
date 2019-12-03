@@ -11,8 +11,8 @@ from deap import tools
 from individual import Individual, initIndividual
 from convindividual import ConvIndividual
 from fitness import Fitness
-from mutation import Mutation
-from crossover import Crossover
+from mutation import Mutation, MutationConv
+from crossover import Crossover, CrossoverConv
 import alg
 from dataset import load_data
 from config import Config, load_config
@@ -69,8 +69,8 @@ toolbox.register("map", pool.map)
 
 # register operators
 fit = Fitness("data/"+trainset_name)
-mut = Mutation()
-cross = Crossover()
+mut = MutationConv() if use_conv_layers else Mutation()
+cross = CrossoverConv() if use_conv_layers else Crossover()
 
 toolbox.register("evaluate", fit.evaluate)
 toolbox.register("mate", cross.cxOnePoint)
