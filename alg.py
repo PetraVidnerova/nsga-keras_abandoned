@@ -32,7 +32,7 @@ def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
 
         population = toolbox.select(population+offspring, k=popsize)
 
-        # halloffame.update(offspring) # nsga2 halloffame works how?
+        halloffame.update(offspring) # nsga2 halloffame works how?
         # update statics
         record = stats.compile(population)
         logbook.record(gen=gen, evals=evals, **record)
