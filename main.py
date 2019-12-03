@@ -132,7 +132,7 @@ if __name__ == "__main__":
     json_list = [] 
     for ind in hof:
         print(ind.fitness.values)
-        json_list.appen(ind.createNetwork().to_json())
+        json_list.append(ind.createNetwork().to_json())
 
     with open("best_model_{}.json".format(id), "w") as f:
         f.write(json.dumps(json_list))
