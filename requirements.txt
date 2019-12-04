@@ -1,0 +1,12 @@
+deap
+ipython
+keras
+matplotlib
+numpy
+pandas
+sklearn
+tensorflow==1.15
+
+# interactive
+jupyterlab
+ipympl
