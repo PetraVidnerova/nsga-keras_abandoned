@@ -51,6 +51,15 @@ def main(conv):
 
 
 @main.command()
+@click.argument("cp_name")
+def list_front(cp_name):
+    _, front, _ = load_checkpoint(cp_name) 
+    print("size", len(front))
+    for i, ind in enumerate(front):
+        print("{}: {} {}", i, ind.fitness.values[0], ind.fitness.values[1])
+    
+
+@main.command()
 @click.argument("i", type=int)
 @click.argument("trainset")
 @click.argument("testset")
