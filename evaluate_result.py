@@ -56,8 +56,43 @@ def list_front(cp_name):
     _, front, _ = load_checkpoint(cp_name) 
     print("size", len(front))
     for i, ind in enumerate(front):
-        print("{}: {} {}", i, ind.fitness.values[0], ind.fitness.values[1])
+        print("{}: {} {}".format(i, ind.fitness.values[0], ind.fitness.values[1]))
     
+@main.command()
+@click.argument("trainset")
+@click.argument("testset")
+@click.argument("cp_name")
+def eval_front(trainset, testset, cp_name):
+    _, front, _ = load_checkpoint(cp_name) 
+
+    # load the whole data
+    X_train, y_train = load_data("data/" + trainset)
+    X_test, y_test = load_data("data/" + testset)
+
+    for i, ind in enumerate(front):
+        E_train, E_test = [], []  # list of accuracies
+        for _ in range(5):
+            network = ind.createNetwork()
+            network.fit(X_train, y_train,
+                        batch_size=Config.batch_size,
+                        nb_epoch=20,
+                        verbose=0)
+
+            yy_train = network.predict(X_train)
+            E_train.append(error(yy_train, y_train))
+
+            yy_test = network.predict(X_test)
+            E_test.append(error(yy_test, y_test))
+            del network 
+
+        print(i, ": ", end="")
+        print_stat(E_train, "train")
+        print(i, ": ", end="")
+        print_stat(E_test, "test")
+        print(i, ": ", end="")
+        print(ind.fitness.values)
+        print()
+
 
 @main.command()
 @click.argument("i", type=int)

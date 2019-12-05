@@ -1,5 +1,3 @@
-for I in `seq 0 19`
-do
- echo "---- $I ---"   
- python evaluate_result.py evaluate $I mnist.train mnist.test checkpoint_nsga_test.pkl 2>/dev/null 
-done
+export CUDA_VISIBLE_DEVICES=5
+python evaluate_result.py eval-front mnist.train mnist.test checkpoint_nsga_test_haklnv.pkl 2>eval.err 1>eval.log
+
