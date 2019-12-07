@@ -1,18 +1,29 @@
+import keras
 import random
 import pickle
 import datetime
 
 from deap import algorithms
 
+from config import Config
+
+
 def eval_invalid_inds(pop, toolbox):
     """ Evaluate the individuals with an invalid fitness 
     Returns the number of reevaluated individuals.
     """
-    invalid_ind = [ind for ind in pop if not ind.fitness.valid]
-    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
-    return len(invalid_ind)
+    invalid_pop = [ind for ind in pop if not ind.fitness.valid]
+    eval_size = len(invalid_pop)
+
+    for batch_begin in range(0, eval_size, Config.eval_batch_size):
+        batch_end = min(batch_begin + Config.eval_batch_size, eval_size)
+        batch_individuals = invalid_pop[batch_begin:batch_end]
+        batch_fitness = toolbox.eval_batch(batch_individuals)
+
+        for individual, fitness in zip(batch_individuals, batch_fitness):
+            individual.fitness.values = fitness
+
+    return eval_size
 
 def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
                  stats, halloffame, logbook, verbose, id=None):

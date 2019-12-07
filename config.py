@@ -45,7 +45,7 @@ class CfgSensorsES:
     
     
 class CfgMnist:
-
+    eval_batch_size = 20
     batch_size = 128
     epochs = 10
     loss = 'categorical_crossentropy'
