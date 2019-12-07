@@ -31,6 +31,7 @@ class Fitness:
 
     def evaluate_batch(self, individuals):
         scores = []
+        # TODO(proste) actually no shuffling takes places
         kf = KFold(n_splits=5, random_state=42)
         for train, test in kf.split(self.X):
             X_train, X_test = self.X[train], self.X[test]
@@ -67,9 +68,9 @@ class Fitness:
                 for yy_test in pred_test
             ])
 
-        fitness = np.mean(scores, axis=0)
+            K.clear_session()  # free resources allocated by models
 
-        K.clear_session()  # free resources allocated by models
+        fitness = np.mean(scores, axis=0)
 
         return list(zip(fitness, sizes))
 
