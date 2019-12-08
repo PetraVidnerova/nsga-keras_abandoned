@@ -59,7 +59,7 @@ class Fitness:
 
             multi_model.fit(
                 X_train, [y_train] * len(individual_models),
-                batch_size=Config.batch_size, epochs=Config.epochs, verbose=1
+                batch_size=Config.batch_size, epochs=Config.epochs, verbose=0
             )
 
             pred_test = multi_model.predict(X_test)
