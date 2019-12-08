@@ -31,8 +31,7 @@ class Fitness:
 
     def evaluate_batch(self, individuals):
         scores = []
-        # TODO(proste) actually no shuffling takes places
-        kf = KFold(n_splits=5, random_state=42)
+        kf = KFold(n_splits=5, shuffle=True, random_state=42)
         for train, test in kf.split(self.X):
             X_train, X_test = self.X[train], self.X[test]
             y_train, y_test = self.y[train], self.y[test]
