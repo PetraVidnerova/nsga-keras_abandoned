@@ -1,0 +1,15 @@
+---
+version: '2.4'
+services:
+  nsga-keras:
+    build:
+      context: .
+      target: nsga-keras
+    entrypoint: [jupyter, lab]
+    command: ["--ip='0.0.0.0'", "--port=8888", "--no-browser", "--allow-root"]
+    ports:
+      - ${JUPYTER_LAB_PORT-8888}:8888
+    volumes:
+      - .:/root/nsga-keras
+      - ${HOME}/.jupyter:/root/.jupyter
+    restart: always
