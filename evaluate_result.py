@@ -138,7 +138,7 @@ def eval_front(trainset, testset, cp_name):
         print_stat(E_test, "test")
         print(i, ": ", end="")
         print(ind.fitness.values)
-        print()
+        print(flush=True)
 
 
 @main.command()
