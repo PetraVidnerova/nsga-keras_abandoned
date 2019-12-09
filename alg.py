@@ -53,9 +53,14 @@ def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
         # save checkpoint
         if gen % 1 == 0:
             # Fill the dictionary using the dict(key=value[, ...]) constructor
-            cp = dict(population=population, generation=gen,
-                      halloffame=halloffame,
-                      logbook=logbook, rndstate=random.getstate())
+            cp = dict(
+                population=population,
+                generation=gen,
+                halloffame=halloffame,
+                logbook=logbook,
+                rndstate=random.getstate(),
+                config=Config,
+            )
             if id is None:
                 cp_name = "checkpoint_nsga.pkl"
             else:
