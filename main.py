@@ -64,14 +64,15 @@ toolbox.register("individual", initIndividual, creator.Individual)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # use multiple processors
-pool = multiprocessing.Pool(10)
-toolbox.register("map", pool.map)
+#pool = multiprocessing.Pool(10)
+#toolbox.register("map", pool.map)
 
 # register operators
 fit = Fitness("data/"+trainset_name)
 mut = MutationConv() if use_conv_layers else Mutation()
 cross = CrossoverConv() if use_conv_layers else Crossover()
 
+toolbox.register("eval_batch", fit.evaluate_batch)
 toolbox.register("evaluate", fit.evaluate)
 toolbox.register("mate", cross.cxOnePoint)
 toolbox.register("mutate", mut.mutate)

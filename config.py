@@ -7,7 +7,7 @@ class Cfg:
 
 
 class CfgMnist:
-
+    eval_batch_size = 20
     batch_size = 128
     epochs = 20
     loss = 'categorical_crossentropy'

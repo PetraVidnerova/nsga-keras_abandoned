@@ -1,7 +1,8 @@
 import random
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation
-from keras.optimizers import RMSprop
+from keras.layers import InputLayer 
+# from keras.optimizers import RMSprop
 
 from config import Config
 
@@ -40,17 +41,14 @@ class Individual:
             layer = Layer().randomInit() 
             self.layers.append(layer)
 
-    def createNetwork(self):
+    def createNetwork(self, input_layer=None):
 
         model = Sequential()
 
-        firstlayer = True
+        model.add(input_layer or InputLayer(Config.input_shape))
+
         for l in self.layers:
-            if firstlayer:
-                model.add(Dense(l.size, input_shape=self.input_shape))
-                firstlayer = False
-            else:
-                model.add(Dense(l.size))
+            model.add(Dense(l.size))
             model.add(Activation(l.activation))
             if l.dropout > 0:
                 model.add(Dropout(l.dropout))
@@ -60,8 +58,8 @@ class Individual:
         if Config.task_type == "classification":
             model.add(Activation('softmax'))
             
-        model.compile(loss=Config.loss,
-                      optimizer=RMSprop())
+        # model.compile(loss=Config.loss,
+        #               optimizer=RMSprop())
         
         return model 
 
