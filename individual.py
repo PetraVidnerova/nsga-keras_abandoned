@@ -70,7 +70,13 @@ class Individual:
             ret += str(l)
             ret += "\n" 
             ret += "------------------------\n"
-        return ret 
+        return ret
+
+    # TODO 
+    # def __eq__(self):
+    #     ... 
+
+    
 
 def initIndividual(indclass):
     ind = indclass()
