@@ -51,32 +51,6 @@ class Fitness:
             # TODO(proste) is it intended to effectively bin model sizes?
             sizes = [(m.count_params() // 1000) for m in individual_models]
 
-
-            multi_model = keras.Model(
-                inputs=input_features.input,
-                outputs=[
-                    individual_model.output
-                    for individual_model in individual_models
-                ]
-            )
-            multi_model.compile(
-                loss=Config.loss,
-                optimizer=keras.optimizers.RMSprop()
-            )
-
-            multi_model.fit(
-                X_train, [y_train] * len(individual_models),
-                batch_size=Config.batch_size, epochs=Config.epochs, verbose=0
-            )
-
-            pred_test = multi_model.predict(X_test)
-            scores.append([
-                error(y_test, yy_test)
-                for yy_test in pred_test
-            ])
-
-            K.clear_session()  # free resources allocated by models
-
             xval_models.extend(individual_models)
 
         multi_model = keras.Model(
@@ -105,11 +79,11 @@ class Fitness:
 
         K.clear_session()  # free resources allocated by models
 
-
         fitness = np.mean(scores, axis=0)
 
         return list(zip(fitness, sizes))
 
+        
     def evaluate(self, individual):
         #print(" *** evaluate *** ")
 
