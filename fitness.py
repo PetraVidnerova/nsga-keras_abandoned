@@ -3,12 +3,12 @@ import random
 import numpy as np 
 import pickle
 import sklearn
+import tqdm
 from sklearn.model_selection import KFold
 from dataset import load_data
 from config import Config
 from utils import error
-from keras import backend as K 
-from tqdm import tqdm
+from keras import backend as K
 
 
 class Database:
@@ -43,7 +43,7 @@ class Fitness:
         ]
 
         xval_models = []
-        for input_features in tqdm(xval_features):
+        for input_features in xval_features:
             individual_models = [
                 individual.createNetwork(input_features)
                 for individual in individuals
@@ -83,6 +83,7 @@ class Fitness:
 
         return list(zip(fitness, sizes))
 
+        
     def evaluate(self, individual):
         #print(" *** evaluate *** ")
 
