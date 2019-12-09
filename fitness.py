@@ -68,7 +68,7 @@ class Fitness:
         multi_model.fit(
             list(xval_datasets[:, 0]),
             [y_train for y_train in xval_datasets[:, 1] for _ in individuals],
-            batch_size=Config.batch_size, epochs=Config.epochs, verbose=1
+            batch_size=Config.batch_size, epochs=Config.epochs, verbose=0
         )
 
         pred_test = multi_model.predict(list(xval_datasets[:, 2]))
