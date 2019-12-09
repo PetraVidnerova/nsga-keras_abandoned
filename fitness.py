@@ -73,7 +73,7 @@ class Fitness:
 
         pred_test = multi_model.predict(list(xval_datasets[:, 2]))
         scores = np.array([
-            error(xval_datasets[test_i % len(xval_datasets), 3], yy_test)
+            error(xval_datasets[test_i // len(individuals), 3], yy_test)
             for test_i, yy_test in enumerate(pred_test)
         ]).reshape(-1, len(individuals))
 
