@@ -58,6 +58,8 @@ def main(conv):
 def evaluate(i, trainset, testset, cp_name):
     pop, _, _ = load_checkpoint(cp_name)
 
+    #    print(pop)
+
     # load the whole data
     X_train, y_train = load_data("data/" + trainset)
     X_test, y_test = load_data("data/" + testset)
@@ -106,12 +108,14 @@ def plot(cp_name):
 
     plt.show()
 
+
 @main.command()
 @click.argument("cp_name")
 def query_iter(cp_name):
     _, _, log = load_checkpoint(cp_name)
 
-    print("Last generation:", [ line["gen"] for line in log][-1])
+    print("Last generation:", [line["gen"] for line in log][-1])
+
 
 if __name__ == "__main__":
     main()
