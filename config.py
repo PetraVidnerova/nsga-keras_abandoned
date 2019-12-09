@@ -9,7 +9,7 @@ class Cfg:
 class CfgMnist:
 
     batch_size = 128
-    epochs = 10
+    epochs = 20
     loss = 'categorical_crossentropy'
     # loss = 'mean_squared_error'
 
