@@ -45,15 +45,18 @@ class CfgSensorsES:
     
     
 class CfgMnist:
-    eval_batch_size = 20
+
+    final_evals  = 5
+    
+    eval_batch_size = 30
     batch_size = 128
-    epochs = 10
+    epochs = 20
     loss = 'categorical_crossentropy'
     #loss = 'mean_squared_error'
     
     task_type = "classification"
 
-    pop_size = 20
+    pop_size = 30
     ngen = 300
 
     MAX_LAYERS = 5
