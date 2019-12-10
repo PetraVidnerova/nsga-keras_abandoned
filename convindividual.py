@@ -2,41 +2,58 @@ import random
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D, InputLayer
-from utils import roulette 
+from utils import roulette
 from individual import Layer
 from config import Config
+
 
 class ConvLayer:
     """ Specification of one convolutional layer.
         Includes number of filters, kernel size, activation.
     """
+
     def __init__(self):
         pass
 
     def randomInit(self):
         self.filters = random.randint(Config.MIN_FILTERS, Config.MAX_FILTERS)
-        # filters are squares kernel_size x kernel_size 
-        self.kernel_size = random.randint(Config.MIN_KERNEL_SIZE, Config.MAX_KERNEL_SIZE)
+        # filters are squares kernel_size x kernel_size
+        self.kernel_size = random.randint(
+            Config.MIN_KERNEL_SIZE, Config.MAX_KERNEL_SIZE)
         self.activation = random.choice(Config.ACTIVATIONS)
         return self
-    
+
     def __str__(self):
         return "conv #{} kernelsize={} activation={}".format(self.filters, self.kernel_size, self.activation)
-        
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        else:
+            return False
+
 
 class MaxPoolLayer:
     """ Specification of one max pooling layer.
     """
+
     def __init__(self):
         pass
-    
+
     def randomInit(self):
         # pooling size is (pool_size, pool_size)
-        self.pool_size =  random.randint(Config.MIN_POOL_SIZE, Config.MAX_POOL_SIZE)
+        self.pool_size = random.randint(
+            Config.MIN_POOL_SIZE, Config.MAX_POOL_SIZE)
         return self
 
     def __str__(self):
         return "pool poolsize={} ".format(self.pool_size)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        else:
+            return False
 
 
 def createRandomLayer():
@@ -47,8 +64,9 @@ def createRandomLayer():
     if create:
         return create()
     else:
-        return ConvLayer() 
-    
+        return ConvLayer()
+
+
 class ConvIndividual:
     """ Individual coding convolutional network architecture.
         Individual consists of two parts, first of convolutioanal
@@ -59,20 +77,19 @@ class ConvIndividual:
         self.input_shape = Config.input_shape
         self.noutputs = Config.noutputs
         self.nparams = None
-        
+
     def randomInit(self):
         self.conv_layers = []
         num_conv_layers = random.randint(1, Config.MAX_CONV_LAYERS)
         for l in range(num_conv_layers):
             layer = createRandomLayer().randomInit()
             self.conv_layers.append(layer)
-            
+
         self.dense_layers = []
         num_dense_layers = random.randint(1, Config.MAX_DENSE_LAYERS)
         for l in range(num_dense_layers):
             layer = Layer().randomInit()
             self.dense_layers.append(layer)
-
 
     def createNetwork(self, input_layer=None):
         model = Sequential()
@@ -82,12 +99,14 @@ class ConvIndividual:
         # convolutional part
         for l in self.conv_layers:
             if type(l) is ConvLayer:
-                model.add(Conv2D(l.filters, (l.kernel_size, l.kernel_size), padding='same'))
+                model.add(
+                    Conv2D(l.filters, (l.kernel_size, l.kernel_size), padding='same'))
                 model.add(Activation(l.activation))
             elif type(l) is MaxPoolLayer:
                 # check if pooling is possible
                 if model.output_shape[1] >= l.pool_size and model.output_shape[2] >= l.pool_size:
-                    model.add(MaxPooling2D(pool_size=(l.pool_size, l.pool_size)))
+                    model.add(MaxPooling2D(
+                        pool_size=(l.pool_size, l.pool_size)))
             else:
                 raise TypeError("unknown type of layer")
 
@@ -108,16 +127,17 @@ class ConvIndividual:
 
         return model
 
-    
     def __str__(self):
 
         ret = "------------------------\n"
         for l in self.conv_layers+self.dense_layers:
             ret += str(l)
-            ret += "\n" 
+            ret += "\n"
             ret += "------------------------\n"
         return ret
 
-    # TODO 
-    # def __eq__(self):
-    #     ... 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        else:
+            return False
