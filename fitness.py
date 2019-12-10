@@ -51,6 +51,7 @@ class Fitness:
             # TODO(proste) is it intended to effectively bin model sizes?
             sizes = [(m.count_params() // 1000) for m in individual_models]
 
+
             xval_models.extend(individual_models)
 
         multi_model = keras.Model(
