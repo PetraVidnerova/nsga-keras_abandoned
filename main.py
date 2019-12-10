@@ -1,7 +1,7 @@
 import random
 import pickle
 import numpy as np
-import multiprocessing
+# import multiprocessing
 import json
 
 from deap import base
@@ -16,13 +16,13 @@ from crossover import Crossover, CrossoverConv
 import alg
 from dataset import load_data
 from config import Config, load_config
-from utils import error
+# from utils import error
 from nsga import selectNSGA
 
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--type', help='either "conv" or "dense"') 
+parser.add_argument('--type', help='either "conv" or "dense"')
 parser.add_argument('--trainset', help='filename of training set')
 parser.add_argument('--testset', help='filename of test set')
 parser.add_argument('--nsga', help='1,2,3')
@@ -34,9 +34,9 @@ parser.add_argument('--config', help='json config filename')
 args = parser.parse_args()
 trainset_name = args.trainset
 testset_name = args.testset
-use_conv_layers = args.type == "conv" 
+use_conv_layers = args.type == "conv"
 if use_conv_layers:
-    print("**** Using convolutional layers.") 
+    print("**** Using convolutional layers.")
 id = args.id
 if id is None:
     id = ""
@@ -49,12 +49,12 @@ if config_name is not None:
 # for classification fitness is accuracy, for approximation fitness is error
 # second fitness element is network size, should be minimised
 if Config.task_type == "classification":
-    creator.create("FitnessMax", base.Fitness, weights=(1.0, -1.0)) 
+    creator.create("FitnessMax", base.Fitness, weights=(1.0, -1.0))
 else:
     creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
 
-creator.create("Individual", 
-               ConvIndividual if use_conv_layers else Individual, 
+creator.create("Individual",
+               ConvIndividual if use_conv_layers else Individual,
                fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
@@ -64,8 +64,8 @@ toolbox.register("individual", initIndividual, creator.Individual)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # use multiple processors
-#pool = multiprocessing.Pool(10)
-#toolbox.register("map", pool.map)
+# pool = multiprocessing.Pool(10)
+# toolbox.register("map", pool.map)
 
 # register operators
 fit = Fitness("data/"+trainset_name)
@@ -83,8 +83,10 @@ elif nsga_number == 1:
 else:
     raise NotImplementedError()
 
+
 def main(id, checkpoint_name=None):
     # random.seed(64)
+    global Config
 
     if checkpoint_name:
         # A file name has been given, then load the data from the file
@@ -94,6 +96,9 @@ def main(id, checkpoint_name=None):
         hof = cp["halloffame"]
         logbook = cp["logbook"]
         random.setstate(cp["rndstate"])
+        if "config" in cp:
+            Config = cp["config"]
+
     else:
         pop = toolbox.population(n=Config.pop_size)
         start_gen = 0
@@ -129,8 +134,8 @@ if __name__ == "__main__":
     else:
         pop, log, hof = main(id, checkpoint_file)
 
-    # print and save the pareto front 
-    json_list = [] 
+    # print and save the pareto front
+    json_list = []
     for ind in hof:
         print(ind.fitness.values)
         json_list.append(ind.createNetwork().to_json())
