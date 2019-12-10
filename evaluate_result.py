@@ -2,7 +2,11 @@ import click
 import pickle
 import matplotlib.pyplot as plt
 
+from keras import Model
+from keras.layers import InputLayer
+from keras.optimizers import RMSprop
 from deap import creator, base
+
 
 from individual import Individual
 from convindividual import ConvIndividual
@@ -58,6 +62,63 @@ def list_front(cp_name):
     for i, ind in enumerate(front):
         print("{}: {} {}".format(i, ind.fitness.values[0], ind.fitness.values[1]))
     
+
+def eval_mean(ind, X_train, y_train, X_test, y_test):
+    #        E_train, E_test = [], []  # list of accuracies
+
+    input_features = InputLayer(X_train[0].shape)
+
+    individual_models = [
+        ind.createNetwork(input_features)
+        for _ in range(Config.final_evals)
+    ]
+
+    multi_model = Model(
+        inputs = [input_features.input],
+        outputs = [
+            individual_model.output
+            for individual_model in individual_models
+        ]
+    )
+
+    multi_model.compile(
+        loss = Config.loss,
+        optimizer = RMSprop()
+    )
+
+    multi_model.fit(
+        X_train,
+        [y_train for _ in range(Config.final_evals)],
+        batch_size=Config.batch_size, epochs=Config.epochs, verbose=0
+    )
+
+    pred_test = multi_model.predict(X_test)
+    E_test = [
+        error(y_test, yy_test)
+        for yy_test in pred_test
+    ]
+
+    pred_train = multi_model.predict(X_train)
+    E_train = [
+        error(y_train, yy_train)
+        for yy_train in pred_train
+    ]
+    
+    # for _ in range(5):
+    #     network = ind.createNetwork()
+    #     network.fit(X_train, y_train,
+    #                 batch_size=Config.batch_size,
+    #                 nb_epoch=20,
+    #                 verbose=0)
+    
+    #     yy_train = network.predict(X_train)
+    #     E_train.append(error(yy_train, y_train))
+    
+    #     yy_test = network.predict(X_test)
+    #     E_test.append(error(yy_test, y_test))
+    #     del network 
+    return E_train, E_test 
+
 @main.command()
 @click.argument("trainset")
 @click.argument("testset")
@@ -70,28 +131,14 @@ def eval_front(trainset, testset, cp_name):
     X_test, y_test = load_data("data/" + testset)
 
     for i, ind in enumerate(front):
-        E_train, E_test = [], []  # list of accuracies
-        for _ in range(5):
-            network = ind.createNetwork()
-            network.fit(X_train, y_train,
-                        batch_size=Config.batch_size,
-                        nb_epoch=20,
-                        verbose=0)
-
-            yy_train = network.predict(X_train)
-            E_train.append(error(yy_train, y_train))
-
-            yy_test = network.predict(X_test)
-            E_test.append(error(yy_test, y_test))
-            del network 
-
+        E_train, E_test = eval_mean(ind, X_train, y_train, X_test, y_test)
         print(i, ": ", end="")
         print_stat(E_train, "train")
         print(i, ": ", end="")
         print_stat(E_test, "test")
         print(i, ": ", end="")
         print(ind.fitness.values)
-        print()
+        print(flush=True)
 
 
 @main.command()
@@ -101,6 +148,8 @@ def eval_front(trainset, testset, cp_name):
 @click.argument("cp_name")
 def evaluate(i, trainset, testset, cp_name):
     pop, _, _ = load_checkpoint(cp_name)
+
+    #    print(pop)
 
     # load the whole data
     X_train, y_train = load_data("data/" + trainset)
@@ -150,12 +199,14 @@ def plot(cp_name):
 
     plt.show()
 
+
 @main.command()
 @click.argument("cp_name")
 def query_iter(cp_name):
     _, _, log = load_checkpoint(cp_name)
 
-    print("Last generation:", [ line["gen"] for line in log][-1])
+    print("Last generation:", [line["gen"] for line in log][-1])
+
 
 if __name__ == "__main__":
     main()

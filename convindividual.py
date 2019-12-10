@@ -1,8 +1,7 @@
 import random
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras.optimizers import RMSprop
+from keras.layers import Conv2D, MaxPooling2D, InputLayer
 from utils import roulette 
 from individual import Layer
 from config import Config
@@ -75,38 +74,23 @@ class ConvIndividual:
             self.dense_layers.append(layer)
 
 
-    def createNetwork(self):
-
+    def createNetwork(self, input_layer=None):
         model = Sequential()
 
+        model.add(input_layer or InputLayer(Config.input_shape))
 
-        firstlayer = True
-
-        # convolutional part 
+        # convolutional part
         for l in self.conv_layers:
             if type(l) is ConvLayer:
-                if firstlayer:
-                    model.add(Conv2D(l.filters, (l.kernel_size, l.kernel_size),
-                                     padding='same', # let not the shape vanish
-                                     input_shape=self.input_shape))
-                    firstlayer = False
-                else:
-                    model.add(Conv2D(l.filters, (l.kernel_size, l.kernel_size), padding='same'))
+                model.add(Conv2D(l.filters, (l.kernel_size, l.kernel_size), padding='same'))
                 model.add(Activation(l.activation))
-                
             elif type(l) is MaxPoolLayer:
-                if firstlayer:
-                    model.add(MaxPooling2D(pool_size=(l.pool_size,l.pool_size),
-                                           input_shape=self.input_shape))
-                    firstlayer = False
-                else:
-                    # check if pooling is possible
-                    if model.layers[-1].output_shape[1] >= l.pool_size and model.layers[-1].output_shape[2] >= l.pool_size:
-                        model.add(MaxPooling2D(pool_size=(l.pool_size, l.pool_size)))
-                    
+                # check if pooling is possible
+                if model.output_shape[1] >= l.pool_size and model.output_shape[2] >= l.pool_size:
+                    model.add(MaxPooling2D(pool_size=(l.pool_size, l.pool_size)))
             else:
-                raise TypeError("unknown type of layer") 
-            
+                raise TypeError("unknown type of layer")
+
         # dense part
         model.add(Flatten())
         for l in self.dense_layers:
@@ -115,17 +99,14 @@ class ConvIndividual:
             if l.dropout > 0:
                 model.add(Dropout(l.dropout))
 
-        # final part 
+        # final part
         model.add(Dense(self.noutputs))
         if Config.task_type == "classification":
             model.add(Activation('softmax'))
-        
-        model.compile(loss=Config.loss,
-                      optimizer=RMSprop())
 
         self.nparams = model.count_params()
-                
-        return model 
+
+        return model
 
     
     def __str__(self):
@@ -135,4 +116,8 @@ class ConvIndividual:
             ret += str(l)
             ret += "\n" 
             ret += "------------------------\n"
-        return ret 
+        return ret
+
+    # TODO 
+    # def __eq__(self):
+    #     ... 
