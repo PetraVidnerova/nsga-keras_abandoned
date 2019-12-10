@@ -25,17 +25,18 @@ def eval_invalid_inds(pop, toolbox):
 
     return eval_size
 
+
 def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
                  stats, halloffame, logbook, verbose, id=None):
 
-    popsize = len(population) 
+    popsize = len(population)
     total_time = datetime.timedelta(seconds=0)
-    
+
     eval_invalid_inds(population, toolbox)
 
     for gen in range(start_gen, ngen):
         start_time = datetime.datetime.now()
-        
+
         offspring = algorithms.varAnd(population, toolbox, cxpb=cxpb,
                                       mutpb=mutpb)
 
@@ -43,7 +44,7 @@ def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
 
         population = toolbox.select(population+offspring, k=popsize)
 
-        halloffame.update(offspring) # nsga2 halloffame works how?
+        halloffame.update(offspring)  # updates pareto front
         # update statics
         record = stats.compile(population)
         logbook.record(gen=gen, evals=evals, **record)
@@ -70,9 +71,12 @@ def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
         # check hard time limit
         gen_time = datetime.datetime.now() - start_time
         total_time = total_time + gen_time
-        # print("Time ", total_time)
-        if total_time > datetime.timedelta(hours=4*24):
-            print("Time limit exceeded.")
-            break
+        print("Time ", total_time)
+
+        # hard time limit was necessary at metacentrum
+        #
+        # if total_time > datetime.timedelta(hours=4*24):
+        #     print("Time limit exceeded.")
+        #     break
 
     return population, logbook
