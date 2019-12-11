@@ -8,9 +8,11 @@ class Cfg:
 
 class CfgMnist:
 
+    GPU = False
+
     final_evals  = 5
     
-    eval_batch_size = 30
+    eval_batch_size = 1
     batch_size = 128
     epochs = 20
     loss = 'categorical_crossentropy'
@@ -19,7 +21,7 @@ class CfgMnist:
     task_type = "classification"
 
     pop_size = 30
-    ngen = 300
+    ngen = 150
 
     MAX_LAYERS = 5
     MAX_LAYER_SIZE = 300

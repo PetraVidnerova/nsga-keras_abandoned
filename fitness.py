@@ -30,6 +30,8 @@ class Fitness:
         self.X, self.y = load_data(train_name)
 
     def evaluate_batch(self, individuals):
+        Config.input_shape = self.X[0].shape # temporal fix, TODO: better cfg
+ 
         kf = KFold(n_splits=5, shuffle=True, random_state=42)
         xval_datasets = np.asarray([
             (self.X[train], self.y[train], self.X[test], self.y[test])
