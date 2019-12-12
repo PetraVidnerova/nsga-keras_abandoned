@@ -11,6 +11,8 @@ Tensorflow, Keras, Deap
 
  TODO: move complete setup to one configuration file 
  
+### Example:
+![picutre](./fig/example.png "")
  
 # Docker
 To run project code independently of your own system setup, `Dockerfile` with convenient `docker-compose` project is provided. Inside the container all the required stuff is installed and using the `docker-compose
