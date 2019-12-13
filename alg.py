@@ -9,7 +9,7 @@ from config import Config
 
 
 def eval_invalid_inds(pop, toolbox):
-    """ Evaluate the individuals with an invalid fitness 
+    """ Evaluate the individuals with an invalid fitness
     Returns the number of reevaluated individuals.
     """
     invalid_pop = [ind for ind in pop if not ind.fitness.valid]
@@ -26,8 +26,8 @@ def eval_invalid_inds(pop, toolbox):
     return eval_size
 
 
-def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
-                 stats, halloffame, logbook, verbose, id=None):
+def nsga(population, start_gen, toolbox, cxpb, mutpb, ngen,
+         stats, halloffame, logbook, verbose, exp_id=None):
 
     popsize = len(population)
     total_time = datetime.timedelta(seconds=0)
@@ -62,10 +62,10 @@ def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
                 rndstate=random.getstate(),
                 config=Config,
             )
-            if id is None:
+            if exp_id is None:
                 cp_name = "checkpoint_nsga.pkl"
             else:
-                cp_name = "checkpoint_nsga_{}.pkl".format(id)
+                cp_name = "checkpoint_nsga_{}.pkl".format(exp_id)
             pickle.dump(cp, open(cp_name, "wb"))
 
         # check hard time limit
@@ -78,5 +78,49 @@ def myNSGASimple(population, start_gen, toolbox, cxpb, mutpb, ngen,
         # if total_time > datetime.timedelta(hours=4*24):
         #     print("Time limit exceeded.")
         #     break
+
+    return population, logbook
+
+
+def vanilla_ga(population, start_gen, toolbox, cxpb, mutpb, ngen,
+               stats, halloffame, logbook, verbose, exp_id=None):
+    """ Basic GA algorithm. Just to have a baseline. """
+
+    total_time = datetime.timedelta(seconds=0)
+    eval_invalid_inds(population, toolbox)
+
+    for gen in range(start_gen, ngen):
+        start_time = datetime.datetime.now()
+        population = algorithms.varAnd(population, toolbox,
+                                       cxpb=cxpb, mutpb=mutpb)
+
+        # Evaluate the individuals with an invalid fitness
+        evals = eval_invalid_inds(population, toolbox)
+
+        halloffame.update(population)
+        record = stats.compile(population)
+        logbook.record(gen=gen, evals=evals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        population = toolbox.select(population, k=len(population))
+
+        if gen % 1 == 0:
+            # Fill the dictionary using the dict(key=value[, ...]) constructor
+            cp = dict(population=population, generation=gen,
+                      halloffame=halloffame,
+                      logbook=logbook, rndstate=random.getstate())
+            if exp_id is None:
+                cp_name = "checkpoint_ea.pkl"
+            else:
+                cp_name = "checkpoint_ea_{}.pkl".format(exp_id)
+            pickle.dump(cp, open(cp_name, "wb"))
+
+        gen_time = datetime.datetime.now() - start_time
+        total_time = total_time + gen_time
+        print("Time ", total_time)
+        if total_time > datetime.timedelta(hours=4*24):
+            print("Time limit exceeded.")
+            break
 
     return population, logbook

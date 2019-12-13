@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--type', help='either "conv" or "dense"')
 parser.add_argument('--trainset', help='filename of training set')
 parser.add_argument('--testset', help='filename of test set')
-parser.add_argument('--nsga', help='1,2,3')
+parser.add_argument('--nsga', help='0,1,2,3')
 parser.add_argument('--id', help='computation id')
 parser.add_argument(
     '--checkpoint', help='checkpoint file to load the initial state from')
@@ -37,9 +37,9 @@ testset_name = args.testset
 use_conv_layers = args.type == "conv"
 if use_conv_layers:
     print("**** Using convolutional layers.")
-id = args.id
-if id is None:
-    id = ""
+exp_id = args.id
+if exp_id is None:
+    exp_id = ""
 nsga_number = int(args.nsga) if args.nsga else 2
 checkpoint_file = args.checkpoint
 config_name = args.config
@@ -77,14 +77,19 @@ toolbox.register("evaluate", fit.evaluate)
 toolbox.register("mate", cross.cxOnePoint)
 toolbox.register("mutate", mut.mutate)
 if nsga_number == 2:
+    # nsgaII - deap implementation
     toolbox.register("select", tools.selNSGA2)
 elif nsga_number == 1:
+    # stepan's version of nsga
     toolbox.register("select", selectNSGA)
+elif nsga_number == 0:
+    # use vanilla GA
+    toolbox.register("select", tools.selTournament, tournsize=3)
 else:
     raise NotImplementedError()
 
 
-def main(id, checkpoint_name=None):
+def main(exp_id, checkpoint_name=None):
     # random.seed(64)
     global Config
 
@@ -111,9 +116,20 @@ def main(id, checkpoint_name=None):
     stats.register("min", np.min, axis=0)
     stats.register("max", np.max, axis=0)
 
-    pop, log = alg.myNSGASimple(pop, start_gen, toolbox, cxpb=0.6, mutpb=0.2, ngen=Config.ngen,
-                                stats=stats, halloffame=hof, logbook=logbook, verbose=True,
-                                id=id)
+    # nsga_number 0 stands for vanilla GA
+    algorithm = alg.nsga if nsga_number != 0 else alg.vanilla_ga
+
+    pop, log = algorithm(pop,
+                         start_gen,
+                         toolbox,
+                         cxpb=0.6,
+                         mutpb=0.2,
+                         ngen=Config.ngen,
+                         stats=stats,
+                         halloffame=hof,
+                         logbook=logbook,
+                         verbose=True,
+                         exp_id=exp_id)
 
     return pop, log, hof
 
@@ -129,10 +145,7 @@ if __name__ == "__main__":
     Config.noutputs = y_train.shape[1]
     #    print(Config.input_shape, Config.noutputs)
 
-    if checkpoint_file is None:
-        pop, log, hof = main(id)
-    else:
-        pop, log, hof = main(id, checkpoint_file)
+    pop, log, hof = main(exp_id, checkpoint_file)
 
     # print and save the pareto front
     json_list = []
@@ -140,7 +153,7 @@ if __name__ == "__main__":
         print(ind.fitness.values)
         json_list.append(ind.createNetwork().to_json())
 
-    with open("best_model_{}.json".format(id), "w") as f:
+    with open("best_model_{}.json".format(exp_id), "w") as f:
         f.write(json.dumps(json_list))
 
     # learn on the whole set
