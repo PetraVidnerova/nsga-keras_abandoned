@@ -5,7 +5,7 @@
 Genetic NAS based on NSGA, NSGAII or NSGAIII algorithms. Works for Sequential models only.
 
 ## Requirements:
-Tensorflow, Keras, Deap 
+Tensorflow, Keras, Deap, numpy, pandas, Scikit-learn
 
 ## Usage:
 
