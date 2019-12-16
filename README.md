@@ -1,15 +1,19 @@
-# nsga-keras
-try again, with Stěpán's implementation
+# Neural Architecture Search for Keras Sequential Models 
 
+*Authors: Petra Vidnerová, Štěpán Procházka. The Czech Academy of Sciences, Institute of Computer Science.*
 
-# todo
+Genetic NAS based on NSGA, NSGAII or NSGAIII algorithms. Works for Sequential models only.
 
-+ write README
+## Requirements:
+Tensorflow, Keras, Deap, numpy, pandas, Scikit-learn
 
-+ compare deap.nsgaII and deap.nsgaIII with ŠP code
+## Usage:
 
-+ runing in paralel on 5 gpus ?
-
+ TODO: move complete setup to one configuration file 
+ 
+### Example:
+![picutre](./fig/example.png "")
+ 
 # Docker
 To run project code independently of your own system setup, `Dockerfile` with convenient `docker-compose` project is provided. Inside the container all the required stuff is installed and using the `docker-compose
 `, project code is mounted for convenient exchange of data between container and the underlying machine.
