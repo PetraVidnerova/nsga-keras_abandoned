@@ -8,8 +8,8 @@ from deap import algorithms
 from config import Config
 
 
-def eval_invalid_inds(pop, toolbox):
-    """ Evaluate the individuals with an invalid fitness
+def eval_invalid_inds_single_gpu(pop, toolbox):
+    """ Evaluate the individuals with an invalid fitness 
     Returns the number of reevaluated individuals.
     """
     invalid_pop = [ind for ind in pop if not ind.fitness.valid]
@@ -25,9 +25,37 @@ def eval_invalid_inds(pop, toolbox):
 
     return eval_size
 
+# TODO: stupid way how to do it, fix 
+def eval_invalid_inds_cpu_parallel(pop, toolbox): 
+    invalid_ind = [ind for ind in pop if not ind.fitness.valid]
+    ind_batches = [
+        [individual]
+        for individual in invalid_ind
+    ] 
+    # fitnesses = toolbox.map(
+    #     lambda x: toolbox.eval_batch(x)[0], # returns one lement list 
+    #     ind_batches 
+    # )
+    
+    fitnesses_in_lists = toolbox.map(
+        toolbox.eval_batch,
+        ind_batches
+    )
+    
+    fitnesses = [l[0] for l in fitnesses_in_lists]
+
+    for ind, fit in zip(invalid_ind, fitnesses):
+        ind.fitness.values = fit
+    return len(invalid_ind)
 
 def nsga(population, start_gen, toolbox, cxpb, mutpb, ngen,
          stats, halloffame, logbook, verbose, exp_id=None):
+
+    eval_invalid_inds = ( 
+        eval_invalid_inds_single_gpu 
+        if Config.GPU 
+        else eval_invalid_inds_cpu_parallel
+    )
 
     popsize = len(population)
     total_time = datetime.timedelta(seconds=0)
@@ -85,6 +113,12 @@ def nsga(population, start_gen, toolbox, cxpb, mutpb, ngen,
 def vanilla_ga(population, start_gen, toolbox, cxpb, mutpb, ngen,
                stats, halloffame, logbook, verbose, exp_id=None):
     """ Basic GA algorithm. Just to have a baseline. """
+
+    eval_invalid_inds = ( 
+        eval_invalid_inds_single_gpu 
+        if Config.GPU 
+        else eval_invalid_inds_cpu_parallel
+    )
 
     total_time = datetime.timedelta(seconds=0)
     eval_invalid_inds(population, toolbox)
