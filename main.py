@@ -64,8 +64,9 @@ toolbox.register("individual", initIndividual, creator.Individual)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # use multiple processors
-pool = multiprocessing.Pool(10)
-toolbox.register("map", pool.map)
+if not Config.GPU:
+    pool = multiprocessing.Pool(10)
+    toolbox.register("map", pool.map)
 
 # register operators
 fit = Fitness("data/"+trainset_name)
