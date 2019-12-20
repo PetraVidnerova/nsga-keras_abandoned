@@ -116,11 +116,18 @@ def main(exp_id, checkpoint_name=None):
         hof = tools.ParetoFront()
         logbook = tools.Logbook()
 
-    stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", np.mean, axis=0)
-    stats.register("std", np.std, axis=0)
-    stats.register("min", np.min, axis=0)
-    stats.register("max", np.max, axis=0)
+    if nsga_number == 0: 
+        stats = tools.Statistics(lambda ind: ind.fitness.values[0])
+        stats.register("avg", np.mean)
+        stats.register("std", np.std)
+        stats.register("min", np.min)
+        stats.register("max", np.max)
+    else:
+        stats = tools.Statistics(lambda ind: ind.fitness.values)
+        stats.register("avg", np.mean, axis=0)
+        stats.register("std", np.std, axis=0)
+        stats.register("min", np.min, axis=0)
+        stats.register("max", np.max, axis=0)
 
     # nsga_number 0 stands for vanilla GA
     algorithm = alg.nsga if nsga_number != 0 else alg.vanilla_ga
