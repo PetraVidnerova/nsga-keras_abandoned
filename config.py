@@ -10,7 +10,7 @@ class CfgMnist:
 
     final_evals = 5
 
-    eval_batch_size = 10
+    eval_batch_size = 30
     batch_size = 128
     epochs = 20
     loss = 'categorical_crossentropy'

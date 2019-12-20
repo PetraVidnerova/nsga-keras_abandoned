@@ -36,7 +36,7 @@ trainset_name = args.trainset
 testset_name = args.testset
 use_conv_layers = args.type == "conv"
 if use_conv_layers:
-    print("**** Using convolutional layers.")
+    print("**** Using convolutional layers.", flush=True)
 exp_id = args.id
 if exp_id is None:
     exp_id = ""
@@ -48,10 +48,16 @@ if config_name is not None:
 
 # for classification fitness is accuracy, for approximation fitness is error
 # second fitness element is network size, should be minimised
-if Config.task_type == "classification":
-    creator.create("FitnessMax", base.Fitness, weights=(1.0, -1.0))
+if nsga_number == 0:
+    if Config.task_type == "classification":
+        creator.create("FitnessMax", base.Fitness, weights=(1.0, 0.0))
+    else:
+        creator.create("FitnessMax", base.Fitness, weights=(-1.0, 0.0))
 else:
-    creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
+    if Config.task_type == "classification":
+        creator.create("FitnessMax", base.Fitness, weights=(1.0, -1.0))
+    else:
+        creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
 
 creator.create("Individual",
                ConvIndividual if use_conv_layers else Individual,

@@ -101,7 +101,7 @@ def vanilla_ga(population, start_gen, toolbox, cxpb, mutpb, ngen,
         record = stats.compile(population)
         logbook.record(gen=gen, evals=evals, **record)
         if verbose:
-            print(logbook.stream)
+            print(logbook.stream, flush=True)
 
         population = toolbox.select(population, k=len(population))
 
@@ -119,8 +119,8 @@ def vanilla_ga(population, start_gen, toolbox, cxpb, mutpb, ngen,
         gen_time = datetime.datetime.now() - start_time
         total_time = total_time + gen_time
         print("Time ", total_time)
-        if total_time > datetime.timedelta(hours=4*24):
-            print("Time limit exceeded.")
-            break
+        # if total_time > datetime.timedelta(hours=4*24):
+        #     print("Time limit exceeded.")
+        #     break
 
     return population, logbook
