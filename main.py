@@ -77,7 +77,10 @@ toolbox.register("eval_batch", fit.evaluate_batch)
 toolbox.register("evaluate", fit.evaluate)
 toolbox.register("mate", cross.cxOnePoint)
 toolbox.register("mutate", mut.mutate)
-if nsga_number == 2:
+if nsga_number == 3:
+    ref_points = tools.uniform_reference_points(2, 12)
+    toolbox.register("select", tools.selNSGA3, ref_points=ref_points)
+elif nsga_number == 2:
     # nsgaII - deap implementation
     toolbox.register("select", tools.selNSGA2)
 elif nsga_number == 1:
